@@ -7,11 +7,10 @@ import re
 import json
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 load_dotenv()
 
@@ -243,8 +242,8 @@ documents = loader.load()
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
 docs = splitter.split_documents(documents)
-embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-db = Chroma.from_documents(docs, embedding, persist_directory="./chroma_db")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001",google_api_key=GOOGLE_API_KEY,)
+db = Chroma.from_documents(docs, embeddings, persist_directory="./chroma_db")
 db.persist()
 
 @app.post("/chat")
